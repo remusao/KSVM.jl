@@ -1,5 +1,10 @@
 module SVMTP
 
-# package code goes here
+using Ipopt
+
+include("quadprog.jl")
+include("hardMargin.jl")
+
+export train
 
 end # module
