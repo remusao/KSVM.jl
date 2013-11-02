@@ -7,13 +7,8 @@ immutable SVM
 end
 
 
-function decision(svm::SVM, x::Vector)
-
-    # Check dimension
-    @assert (size(x, 1) == svm.dim) "Data dimension must match"
-
-    sign((svm.w' * x + svm.b)[1])
-end
+# Take a decision
+decision(svm::SVM, x::Vector) = sign((svm.w' * x + svm.b)[1])
 
 
 function process(svm, data::Matrix)
