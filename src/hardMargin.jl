@@ -1,4 +1,5 @@
 
+
 function decision(alpha, dataTrain, data)
 end
 

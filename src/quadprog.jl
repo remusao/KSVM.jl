@@ -23,7 +23,7 @@ function quadprog(H::Matrix,
     # Number of non-zeros in Jacobian
     nele_jac = n
     # Number of non-zeros in Hessian
-    nele_hess = n
+    nele_hess = int((n * n) / 2)
 
 
     # Callback: objective function
@@ -83,7 +83,7 @@ function quadprog(H::Matrix,
         eval_grad_f,    # Callback: objective function gradient
         eval_jac_g)     # Callback: Jacobian evaluation
 
-    prob.x = rand(Float64, n)
+    prob.x = zeros(Float64, n)
 
     # We do not provide a Hessian
     addOption(prob, "hessian_approximation", "limited-memory")
@@ -94,5 +94,3 @@ function quadprog(H::Matrix,
     # Return optimal alpha
     prob.x
 end
-
-
