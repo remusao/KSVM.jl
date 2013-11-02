@@ -41,7 +41,7 @@ function print_2Ddecision(data, w, b)
     f(x) = (w' * x + b)[1]
 
     #
-    # Generate data set
+    # Get class of each data point
     #
     n = size(data, 2)
     color = Array(Int, n)
@@ -50,13 +50,16 @@ function print_2Ddecision(data, w, b)
         color[i] = sign(f(data[:, i]))
     end
 
-    color[color .== -1] = 2
+    #
+    # Output result
+    #
+
+    color[color .== -1] = 0
 
     y = reshape(data[1, :], n)
     x = reshape(data[2, :], n)
 
-    p = plot(x = x, y = y, color = color, Geom.point)
-    draw(PNG("myplot.png", 6inch, 3inch), p)
+    println(plot(x = x, y = y, group = color, kind = :scatter))
 end
 
 
@@ -82,5 +85,6 @@ function train(data, labels)
     w, b = hyperplan(alpha, data, labels)
 
     # Print result on a random sample
+    print_2Ddecision(data, w, b)
     print_2Ddecision(rand(2, 1000) * 4 - 2, w, b)
 end
