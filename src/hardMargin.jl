@@ -1,13 +1,5 @@
 
-
-function decision(alpha, dataTrain, data)
-end
-
-
-function process(alpha, dataTrain, data)
-end
-
-function hyperplan(alpha, data, labels)
+function hyperplan(alpha::Vector, data::Matrix, labels::Vector)
 
     #
     # Compute W
@@ -28,34 +20,31 @@ function hyperplan(alpha, data, labels)
     b = 0
 
     for i = 1:Nsv
-        b = b + (labels[indexsv[i]] - w' * data[:, indexsv[i]])
+        b = b + (labels[indexsv[i]] - w' * data[:, indexsv[i]])[1]
     end
     b /= float(Nsv)
 
+
+    # Return hyperplan parameters
     w, b
 end
 
 
-function print_2Ddecision(data, w, b)
+function print_2Ddecision(svm::SVM, data)
 
-    # Decision function
-    f(x) = (w' * x + b)[1]
+    # Check that we work in 2 dimensions
+    @assert (svm.dim == 2) "data must be 2D"
 
     #
     # Get class of each data point
     #
     n = size(data, 2)
-    color = Array(Int, n)
-
-    for i = 1:n
-        color[i] = sign(f(data[:, i]))
-    end
+    color = process(svm, data)
+    color[color .== -1] = 0
 
     #
     # Output result
     #
-
-    color[color .== -1] = 0
 
     y = reshape(data[1, :], n)
     x = reshape(data[2, :], n)
@@ -75,17 +64,23 @@ function train(data, labels)
     computeH(g::Matrix, label::Vector) = (label * label') .* g
 
     alpha = quadprog(
-        computeH(computeG(data), labels),  # H
-        -ones(Float64, n),              # f
-        labels,                         # Aeq
-        zeros(Float64, n),              # Beq
-        zeros(Float64, n),              # LowerBound x
-        fill(Inf, n))                   # UpperBound x
+        computeH(computeG(data), labels),   # H
+        -ones(Float64, n),                  # f
+        labels,                             # Aeq
+        zeros(Float64, n),                  # Beq
+        zeros(Float64, n),                  # LowerBound x
+        fill(Inf, n))                       # UpperBound x
 
     # Get hyperplan parameters
     w, b = hyperplan(alpha, data, labels)
 
+    # Return trained SVM
+    svm = SVM(size(data, 1), alpha, w, b)
+
     # Print result on a random sample
-    print_2Ddecision(data, w, b)
-    print_2Ddecision(rand(2, 1000) * 4 - 2, w, b)
+    print_2Ddecision(svm, data)
+    print_2Ddecision(svm, rand(2, 1000) * 4 - 2)
+
+    # Return trained svm
+    svm
 end
