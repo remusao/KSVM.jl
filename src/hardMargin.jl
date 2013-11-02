@@ -57,6 +57,7 @@ function train(data, labels)
     # Print result on a random sample
     print_2Ddecision(svm, data)
     print_2Ddecision(svm, rand(2, 1000) * 4 - 2)
+    print_supportVectors(svm, data)
 
     # Return trained svm
     svm
