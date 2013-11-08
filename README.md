@@ -1,4 +1,4 @@
-# SVMTP
+# KSVM
 
 ## Overview
 
@@ -12,7 +12,7 @@ the following kernel functions are availables:
 ## Installation
 
 ```julia
-Pkg.clone("https://github.com/remusao/SVMTP.jl.git")
+Pkg.clone("https://github.com/remusao/KSVM.jl.git")
 Pkg.update()
 ```
 
@@ -20,7 +20,7 @@ Pkg.update()
 
 ```julia
 using Vega
-using SVMTP
+using KSVM
 
 # Declare data
 x = [[0 0 0 0 0 1 1 2 2 2 2 2 3 3 3 3 3 4 4 4 4 4 5 5 6 6 6 6 6],
