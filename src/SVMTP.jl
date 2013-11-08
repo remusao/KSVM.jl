@@ -1,6 +1,6 @@
 module SVMTP
 
-using Gadfly
+using Vega
 using Ipopt
 
 include("quadprog.jl")

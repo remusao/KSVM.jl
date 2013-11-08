@@ -1,8 +1,10 @@
 
 immutable SVM
-    dim::Int
-    alpha::Vector{Float64}
-    w::Vector{Float64}
+    n::Integer
+    dim::Integer
+    data::Matrix
+    labels::Vector
+    alpha::Vector
     b::Float64
     kernel::Function
 end
@@ -10,7 +12,11 @@ end
 
 # Take a decision
 function decision(svm::SVM, x::Vector)
-    sign((svm.w' * x + svm.b)[1])
+    res = 0
+    for i = 1:svm.n
+        res += svm.alpha[i] * svm.labels[i] * svm.kernel(svm.data[:, i], x)
+    end
+    sign(res + svm.b)
 end
 
 
@@ -30,56 +36,56 @@ function process(svm::SVM, data::Matrix)
 end
 
 
-function hyperplan(alpha::Vector, data::Matrix, labels::Vector)
-
-    #
-    # Compute W
-    #
-    n = size(data, 2)
-    w = Array(Float64, size(data, 1))
-    for i = 1:n
-        w = w + data[:, i] * alpha[i] * labels[i]
-    end
-
-    #
-    # Compute b
-    #
-
-    # Find support vectors
-    indexsv = findn(alpha)
-    Nsv = size(indexsv, 2)
+function getb(alpha::Vector, data::Matrix, labels::Vector, kernel::Function)
+    # Number of support vectors
+    nsv = size(labels, 1)
     b = 0
 
-    for i = 1:Nsv
-        b = b + (labels[indexsv[i]] - w' * data[:, indexsv[i]])[1]
+    for j = 1:nsv
+        tmp = labels[j]
+        for i = 1:nsv
+            tmp = tmp - alpha[i] * labels[i] * kernel(data[:, i], data[:, j])
+        end
+        b += tmp
     end
-    b /= float(Nsv)
+    b /= nsv
 
-
-    # Return hyperplan parameters
-    w, b
+    return b
 end
 
 
 #
 # Train a hardmargin SVM. Possibility to use a user defined kernel function
 #
-function train(data::Matrix, labels::Vector, kernel = linear, karg = nothing)
+function train(data::Matrix, labels::Vector, kfun = linear, karg = nothing)
 
     # Number of examples
     n = size(labels, 1)
 
     # Defines kernel function
-    K(x, y) = kernel(x, y)
-    if karg != nothing
-        K(x, y) = kernel(x, y, karg...)
+    if karg == nothing
+        kernel(x, y) = kfun(x, y)
+    else
+        kernel(x, y) = kfun(x, y, karg...)
     end
 
     # G(i, j) = <xi, xj>
-    computeG(x::Matrix) = K(x, x)
+    function computeG(x::Matrix)
+        g = Array(Float64, n, n)
+
+        for i = 1:n
+            for j = 1:n
+                g[i, j] = kernel(x[:, i], x[:, j])
+            end
+        end
+
+        return g
+    end
 
     # H(i, j) = yi * yj * <xi, xj>
-    computeH(g::Matrix, label::Vector) = (label * label') .* g
+    function computeH(g::Matrix, label::Vector)
+        return (label * label') .* g
+    end
 
     # Find optimal solution
     alpha = quadprog(
@@ -90,17 +96,15 @@ function train(data::Matrix, labels::Vector, kernel = linear, karg = nothing)
         zeros(Float64, n),                  # LowerBound x
         fill(Inf, n))                       # UpperBound x
 
-    # Get hyperplan parameters
-    w, b = hyperplan(alpha, data, labels)
+    # Only keep support vectors and their associated labels
+    indexsv = findn(alpha)
+    data = data[:, indexsv]
+    labels = labels[indexsv]
+    alpha = alpha[indexsv]
+
+    # Get b parameter
+    b = getb(alpha, data, labels, kernel)
 
     # Return trained SVM
-    svm = SVM(size(data, 1), alpha, w, b, K)
-
-    # Print result on a random sample
-    print_2Ddecision(svm, data)
-    print_2Ddecision(svm, rand(2, 1000) * 4 - 2)
-    print_supportVectors(svm, data)
-
-    # Return trained svm
-    svm
+    return SVM(size(data, 2), size(data, 1), data, labels, alpha, b, kernel)
 end

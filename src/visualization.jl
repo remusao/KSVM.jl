@@ -11,21 +11,14 @@ function label(x::Integer)
 end
 
 
-function print_supportVectors(svm::SVM, data::Matrix)
+function print_supportVectors(svm::SVM)
 
     @assert (svm.dim == 2) "data must be 2D"
-    @assert (size(svm.alpha, 1) == size(data, 2))
 
-    n = size(data, 2)
-    indexsv = findn(svm.alpha)
-    color = process(svm, data)
-    color[indexsv] = 0
+    y = reshape(svm.data[1, :], svm.n)
+    x = reshape(svm.data[2, :], svm.n)
 
-    y = reshape(data[1, :], n)
-    x = reshape(data[2, :], n)
-
-    p = plot(x = x, y = y, color = map(label, color), Geom.point)
-    draw(PNG("supportVectors.png", 6inch, 3inch), p)
+    println(plot(x = x, y = y, kind = :scatter))
 end
 
 
@@ -34,10 +27,11 @@ function print_2Ddecision(svm::SVM, data::Matrix)
     # Check that we work in 2 dimensions
     @assert (svm.dim == 2) "data must be 2D"
 
+    dim, n = size(data)
+
     #
     # Get class of each data point
     #
-    n = size(data, 2)
     color = process(svm, data)
 
     #
@@ -47,7 +41,6 @@ function print_2Ddecision(svm::SVM, data::Matrix)
     y = reshape(data[1, :], n)
     x = reshape(data[2, :], n)
 
-    p = plot(x = x, y = y, color = map(label, color), Geom.point)
-    draw(PNG("2Ddecision.png", 6inch, 3inch), p)
+    println(plot(x = x, y = y, group = map(label, color), kind = :scatter))
 end
 
