@@ -11,7 +11,7 @@ function label(x::Integer)
 end
 
 
-function print_supportVectors(svm::SVM, data)
+function print_supportVectors(svm::SVM, data::Matrix)
 
     @assert (svm.dim == 2) "data must be 2D"
     @assert (size(svm.alpha, 1) == size(data, 2))
@@ -29,7 +29,7 @@ function print_supportVectors(svm::SVM, data)
 end
 
 
-function print_2Ddecision(svm::SVM, data)
+function print_2Ddecision(svm::SVM, data::Matrix)
 
     # Check that we work in 2 dimensions
     @assert (svm.dim == 2) "data must be 2D"
