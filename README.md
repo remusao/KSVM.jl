@@ -1,4 +1,4 @@
-# LDA
+# SVMTP
 
 ## Overview
 
