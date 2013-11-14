@@ -57,7 +57,12 @@ end
 #
 # Train a hardmargin SVM. Possibility to use a user defined kernel function
 #
-function train(data::Matrix, labels::Vector, kfun = linear, karg = nothing)
+function train(
+    data::Matrix,               # Training examples
+    labels::Vector;             # Labeling for training examples
+    C::Float64 = Inf,           # upperbound for the solution (used for soft-margin)
+    kfun::Function = linear,    # Kernel function to compute dot product in feature space
+    karg = nothing)             # Arguments of the kernel function
 
     # Number of examples
     n = size(labels, 1)
@@ -94,7 +99,7 @@ function train(data::Matrix, labels::Vector, kfun = linear, karg = nothing)
         labels,                             # Aeq
         zeros(Float64, n),                  # Beq
         zeros(Float64, n),                  # LowerBound x
-        fill(Inf, n))                       # UpperBound x
+        fill(C, n))                         # UpperBound x
 
     # Only keep support vectors and their associated labels
     indexsv = findn(alpha)
